@@ -27,7 +27,7 @@ if (!$res->{success}) {
     infof "not modified $details_txt_gz, so exit";
     exit;
 } else {
-    infof "finished http get, and got %dMB %s",
+    infof "finished http get, and got %.2fMB %s",
         (-s $details_txt_gz) / (1024**2), $details_txt_gz;
 }
 
@@ -76,4 +76,4 @@ for my $distfile (sort keys %$provides) {
     $insert->execute($distfile, $JSON->encode($provides->{$distfile}));
 }
 $dbh->commit;
-infof "finished inserting %d new rows", $count;
+infof "finished inserting %d new distfiles", $count;

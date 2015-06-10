@@ -50,7 +50,14 @@ $proclet->service(
 
 $proclet->service(
     code => sub {
-        exec $^X, "pause.pl",
+        exec $^X, "ping.pl";
+    },
+    tag => "ping",
+);
+
+$proclet->service(
+    code => sub {
+        exec $^X, "pause.pl";
     },
     every => "*/15 * * * *",
     tag => "pause",

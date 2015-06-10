@@ -10,7 +10,10 @@ use DBD::SQLite;
 use JSON::XS 'decode_json';
 use Encode 'encode_utf8';
 use Plack::Builder;
+use POSIX qw(strftime);
+use Time::Duration ();
 
+my $start = time;
 my $root = Plack::App::File->new(file => "public/index.html")->to_app;
 my $logs = Plack::App::Directory->new(root => "logs")->to_app;
 my $cache_dir = "cache";
@@ -34,6 +37,16 @@ provides:
 }
 
 get '/' => [$root];
+
+get '/ping' => sub {
+    my $res = Plack::Response->new(200);
+    my $body = sprintf "uptime %s, since %s\n",
+        Time::Duration::duration(time - $start), strftime("%F %T %Z(%z)", localtime($start));
+    $res->content_type("text/plain");
+    $res->content_length(length $body);
+    $res->body($body);
+    $res;
+};
 
 get '/v1.0/provides/*' => sub {
     my ($req, $param) = @_;

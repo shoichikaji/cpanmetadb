@@ -13,3 +13,5 @@ requires 'Proclet';
 requires 'Router::Simple';
 requires 'Starlet';
 requires 'parent';
+requires 'Time::Duration';
+requires 'IO::Socket::SSL';
