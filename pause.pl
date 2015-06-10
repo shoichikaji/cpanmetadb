@@ -8,6 +8,7 @@ use HTTP::Tiny;
 use JSON::XS ();
 use Log::Minimal;
 use PerlIO::gzip;
+use POSIX qw(strftime);
 
 my $JSON = JSON::XS->new->canonical(1);
 my $cache_dir = "cache";
@@ -23,12 +24,14 @@ my $res = HTTP::Tiny->new(timeout => 30)->mirror(
 
 if (!$res->{success}) {
     croakf "failed http get $details_txt_gz_url: $res->{status} $res->{reason}";
-} elsif ($res->{status} == 304) {
-    infof "not modified $details_txt_gz, so exit";
-    exit;
 } else {
-    infof "finished http get, and got %.2fMB %s",
-        (-s $details_txt_gz) / (1024**2), $details_txt_gz;
+    my $last_modified = strftime("last-modified: %FT%T%z", localtime((stat $details_txt_gz)[9]));
+    if ($res->{status} == 304) {
+        infof "not modified %s (%s), so exit", $details_txt_gz, $last_modified;
+        exit;
+    }
+    infof "got %.2fMB %s (%s)",
+        (-s $details_txt_gz) / (1024**2), $details_txt_gz, $last_modified;
 }
 
 my $provides = do {
