@@ -6,7 +6,6 @@ requires 'DBIx::Simple';
 requires 'File::RotateLogs';
 requires 'HTTP::Tiny';
 requires 'JSON::XS';
-requires 'Log::Minimal';
 requires 'PerlIO::gzip';
 requires 'Plack';
 requires 'Proclet';

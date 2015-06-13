@@ -59,7 +59,7 @@ $proclet->service(
     code => sub {
         exec $^X, "pause.pl";
     },
-    every => "*/15 * * * *",
+    every => "*/30 * * * *",
     tag => "pause",
 );
 
