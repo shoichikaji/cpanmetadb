@@ -87,11 +87,15 @@ for my $distfile (sort keys %$provides) {
 }
 $dbh->commit;
 infof "finished to inserting to db";
+
 infof "symlink $current_dbname to $dbname";
-if (-e $dbname || -l $dbname) {
-    unlink $dbname or croakf "failed to unlink $dbname: $!";
-}
-symlink $current_dbname, $dbname or croakf "failed to symlink: $!";
+my $tmp_dbname = "$dbname.tmp";
+unlink $tmp_dbname if -e $tmp_dbname || -l $tmp_dbname;
+symlink $current_dbname, $tmp_dbname
+    or croakf "failed to symlink $current_dbname, $tmp_dbname: $!";
+rename $tmp_dbname, $dbname
+    or croakf "failed to rename $tmp_dbname, $dbname: $!";
+
 my @old = grep { $_ ne $current_dbname } glob "$dbname.*";
 for my $old (@old) {
     infof "unlink old $old";
