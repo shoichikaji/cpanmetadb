@@ -8,12 +8,14 @@ use Encode 'encode_utf8';
 use Plack::Builder;
 use POSIX qw(strftime);
 use Time::Duration ();
+use MetaCPAN;
 
 my $start = time;
 my $root = Plack::App::File->new(file => "public/index.html")->to_app;
 my $logs = Plack::App::Directory->new(root => "logs")->to_app;
 my $dbname = "cache/pause.sqlite3";
 my $dsn = "dbi:SQLite:dbname=$dbname";
+my $metacpan = MetaCPAN->new("cache/chi");
 
 {
     package MyDB;
@@ -58,6 +60,22 @@ provides:
 ...
         }
     }
+    if (my $requirements = $opt{requirements}) {
+        $yaml .= <<"...";
+requirements:
+...
+        for my $requirement (@$requirements) {
+            my $version = $requirement->{version} || 0;
+            $version = 0 if $version eq 'undef';
+            $yaml .= <<"...";
+  -
+    package: @{[ $requirement->{package} ]}
+    version: @{[ $version ]}
+    phase: @{[ $requirement->{phase} ]}
+    type: @{[ $requirement->{type} ]}
+...
+        }
+    }
     $yaml;
 }
 
@@ -65,11 +83,17 @@ sub res_404 {
     Plack::Response->new(404,  ["Content-Type" => "text/plain"], "Not found\n");
 }
 sub res_yaml {
-    my $yaml = shift;
+    my %opt = @_;
+    my $body = $opt{body};
     my $res = Plack::Response->new(200);
     $res->content_type('text/yaml');
-    $res->content_length(length $yaml);
-    $res->body($yaml);
+    $res->content_length(length $body);
+    $res->body($body);
+    if (my $header = $opt{header}) {
+        while (my ($k, $v) = each %$header) {
+            $res->header($k => $v);
+        }
+    }
     $res;
 }
 
@@ -100,7 +124,16 @@ get '/v1.1/package/:package' => sub {
 
     return res_404 unless $distfile;
 
-    res_yaml write_yaml($distfile, version => $version, provides => $provides);
+    my ($requirements, $cache_hit)
+        = $metacpan->fetch_requirements($distfile);
+    return res_404 unless $requirements;
+
+    my $yaml = write_yaml(
+        $distfile,
+        version => $version, provides => $provides, requirements => $requirements,
+    );
+
+    res_yaml body => $yaml, header => {'X-Cache' => $cache_hit ? 1 : 0};
 };
 
 get '/v1.0/provides/*' => sub {
@@ -112,7 +145,8 @@ get '/v1.0/provides/*' => sub {
 
     return res_404 unless $distfile;
 
-    res_yaml write_yaml($distfile, provides => $provides);
+    my $yaml = write_yaml($distfile, provides => $provides);
+    res_yaml body => $yaml;
 };
 
 builder {
