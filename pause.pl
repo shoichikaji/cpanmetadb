@@ -23,7 +23,10 @@ my $current_dbname = "$dbname." . time;
 my $dsn = "dbi:SQLite:dbname=$current_dbname";
 
 infof "start http get $details_txt_gz_url";
-my $res = HTTP::Tiny->new(timeout => 30)->mirror(
+my $res = HTTP::Tiny->new(
+    agent => "contact: https://github.com/shoichikaji/cpanmetadb-provides",
+    timeout => 30,
+)->mirror(
     $details_txt_gz_url => $details_txt_gz,
 );
 

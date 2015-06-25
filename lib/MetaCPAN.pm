@@ -15,7 +15,10 @@ sub new {
         driver => 'File',
         root_dir => $dir,
     );
-    my $ua = HTTP::Tiny->new(timeout => 10);
+    my $ua = HTTP::Tiny->new(
+        agent => "contact: https://github.com/shoichikaji/cpanmetadb-provides",
+        timeout => 10,
+    );
     bless { cache => $cache, ua => $ua }, $class;
 }
 
