@@ -41,7 +41,7 @@ $proclet->service(
         my $loader = Plack::Loader->load('Starlet',
             port => $port,
             host => '0.0.0.0',
-            max_workers => 4,
+            max_workers => 6,
         );
         $loader->run(Plack::Util::load_psgi("app.psgi"));
     },
