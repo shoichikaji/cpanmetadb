@@ -1,6 +1,7 @@
 requires 'perl', '5.10.1';
 
 requires 'CHI';
+requires 'CPAN::DistnameInfo';
 requires 'DBD::SQLite';
 requires 'DBI';
 requires 'DBIx::Simple';

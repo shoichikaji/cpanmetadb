@@ -5,6 +5,7 @@ use utf8;
 use HTTP::Tiny;
 use IO::Socket::SSL;
 use JSON::XS ();
+use CPAN::DistnameInfo;
 use CHI;
 
 our $URL = "https://api.metacpan.org/release";
@@ -37,9 +38,10 @@ sub fetch_requirements {
 
 sub _fetch_requirements {
     my ($self, $distfile) = @_;
-    $distfile =~ s{^./../}{};
-    $distfile =~ s{\.(?:tar\.gz|zip|tgz|tar\.bz2)$}{};
-    my $res = $self->ua->get("$URL/$distfile");
+    my $info = CPAN::DistnameInfo->new($distfile);
+    my $cpanid = $info->cpanid;
+    my $distvname = $info->distvname;
+    my $res = $self->ua->get("$URL/$cpanid/$distvname");
     return unless $res->{success};
     if (my $json = eval { JSON::XS::decode_json($res->{content}) }) {
         my $requirements = $json->{dependency} or return;
