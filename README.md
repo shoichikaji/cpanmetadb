@@ -11,11 +11,17 @@ This is a fork of [CPAN Meta DB](http://cpanmetadb.plackperl.org/).
 * distfile
 * version
 * provides (new!)
-* requirements (new!)
+
+`/v1.2/package/Package::Name` returns:
+
+* distfile
+* version
+* provides (new!)
+* requirements (via MetaCPAN, new!)
 
 Example:
 
-https://cpanmetadb-provides.herokuapp.com/v1.1/package/Moo
+https://cpanmetadb-provides.herokuapp.com/v1.2/package/Moo
 
 ```
 ---

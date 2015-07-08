@@ -124,6 +124,26 @@ get '/v1.1/package/:package' => sub {
 
     return res_404 unless $distfile;
 
+    my $yaml = write_yaml(
+        $distfile,
+        version => $version, provides => $provides,
+    );
+
+    res_yaml body => $yaml;
+};
+
+get '/v1.2/package/:package' => sub {
+    my ($req, $param) = @_;
+    my $package = $param->{package};
+
+    my $db = MyDB->connect($dsn);
+    my ($distfile, $version, $provides);
+    ($distfile, $version) = $db->get_distfile($package);
+    $provides = $db->get_provides($distfile) if $distfile;
+    $db->disconnect;
+
+    return res_404 unless $distfile;
+
     my ($requirements, $cache_hit)
         = $metacpan->fetch_requirements($distfile);
     return res_404 unless $requirements;
@@ -134,19 +154,6 @@ get '/v1.1/package/:package' => sub {
     );
 
     res_yaml body => $yaml, header => {'X-Cache' => $cache_hit ? 1 : 0};
-};
-
-get '/v1.0/provides/*' => sub {
-    my ($req, $param) = @_;
-    my $distfile = $param->{splat}[0];
-    my $db = MyDB->connect($dsn);
-    my $provides = $db->get_provides($distfile);
-    $db->disconnect;
-
-    return res_404 unless $distfile;
-
-    my $yaml = write_yaml($distfile, provides => $provides);
-    res_yaml body => $yaml;
 };
 
 builder {

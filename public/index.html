@@ -22,10 +22,22 @@ This is a fork of <a href="http://cpanmetadb.plackperl.org/">CPAN Meta DB</a>.
 
 <dt><code>/v1.1/package/Package::Name</code><dt>
 <dd>Returns
-the latest distribution file path that contains the package,
-its version string and
-providing packages.
-(<a href="/v1.1/package/Plack">Example</a>)</dd>
+<ul>
+  <li>distfile</li>
+  <li>version</li>
+  <li>provides</li>
+</ul>
+eg: <a href="/v1.1/package/Plack">/v1.1/package/Plack</a></dd>
+
+<dt><code>/v1.2/package/Package::Name</code><dt>
+<dd>Returns
+<ul>
+  <li>distfile</li>
+  <li>version</li>
+  <li>provides</li>
+  <li>requirements (via MetaCPAN)</li>
+</ul>
+eg: <a href="/v1.2/package/Plack">/v1.2/package/Plack</a></dd>
 
 <p>
   source code is available at
